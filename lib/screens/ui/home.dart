@@ -20,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Marker marker;
   Circle circle;
   GoogleMapController _controller;
+  Set<Marker> _markers = {};
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +50,54 @@ class _MyHomePageState extends State<MyHomePage> {
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition:
-            CameraPosition(target: LatLng(6.25, 80.21), zoom: 15.00),
-        markers: Set.of([marker, parking1Marker, parking2Marker]),
+            CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
+        markers: _markers,
+        // markers: Set.of([marker, parking1Marker, parking2Marker]),
+        // markers: Set.of([parking1Marker, parking2Marker]),
+
         circles: Set.of((circle != null) ? [circle] : []),
         onMapCreated: (GoogleMapController controller) {
           _controller = controller;
+          setState(() {
+            // _markers.add(Marker(
+            //     markerId: MarkerId('Marker1'),
+            //     position: LatLng(6.4204138, 80.0049826),
+            //     icon: BitmapDescriptor.defaultMarkerWithHue(
+            //         BitmapDescriptor.hueRed),
+            //     onTap: () {
+            //       _showModalBottomSheet();
+            //     }));
+
+            // Markers for the parking places
+            Marker parking1Marker = Marker(
+              markerId: MarkerId('Parking1'),
+              position: LatLng(6.4204138, 80.0049826),
+              onTap: () {
+                _showModalBottomSheet();
+              },
+              infoWindow: InfoWindow(title: 'Public Park'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueRed),
+            );
+
+            Marker parking2Marker = Marker(
+              markerId: MarkerId('Parking2'),
+              position: LatLng(6.421276, 79.9999034),
+              onTap: () {
+                _showModalBottomSheet();
+              },
+              infoWindow: InfoWindow(title: 'Beach Park'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueBlue),
+            );
+            _markers.add(parking1Marker);
+            _markers.add(parking2Marker);
+          });
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => debugPrint("Tapped on flotbtn"),
+        onPressed: () =>
+            {_showModalBottomSheet(), debugPrint("Tapped on flotbtn")},
         child: Icon(Icons.map),
       ),
     );
@@ -104,15 +144,19 @@ class _MyHomePageState extends State<MyHomePage> {
     LatLng latlng = LatLng(newLocalData.latitude, newLocalData.longitude);
 
     this.setState(() {
-      marker = Marker(
+      Marker myLocation = Marker(
           markerId: MarkerId("home"),
           position: latlng,
           rotation: newLocalData.heading,
+          onTap: () {
+            print("Tapped on my position");
+          },
           draggable: false,
           zIndex: 2,
           flat: true,
           anchor: Offset(0.5, 0.5),
           icon: BitmapDescriptor.fromBytes(imageData));
+
       circle = Circle(
           circleId: CircleId("car"),
           radius: newLocalData.accuracy,
@@ -120,6 +164,8 @@ class _MyHomePageState extends State<MyHomePage> {
           strokeColor: Colors.blue,
           center: latlng,
           fillColor: Colors.blue.withAlpha(70));
+
+      _markers.add(myLocation);
     });
   }
 
@@ -130,22 +176,36 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     super.dispose();
   }
+
+  void _showModalBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Column(children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.email),
+              title: Text("Email"),
+              onTap: () {
+                print("tapped on me");
+              },
+            ),
+          ]);
+        });
+  }
 }
 
-// Markers for the parking places
-Marker parking1Marker = Marker(
-  markerId: MarkerId('Parking1'),
-  position: LatLng(6.4204138, 80.0049826),
-  infoWindow: InfoWindow(title: 'Public Park'),
-  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-);
-
-Marker parking2Marker = Marker(
-  markerId: MarkerId('Parking2'),
-  position: LatLng(6.421276, 79.9999034),
-  infoWindow: InfoWindow(title: 'Beach Park'),
-  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-);
+// Widget bottomSheet(BuildContext context) {
+//   return Container(
+//       child: Column(children: <Widget>[
+//     ListTile(
+//       leading: Icon(Icons.email),
+//       title: Text("Emails"),
+//       onTap: () {
+//         print("object");
+//       },
+//     )
+//   ]));
+// }
 
 void choiceAction(String choice) {
   if (choice == Menu.listView) {
