@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:permission/permission.dart';
 import '../menu/menu.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -21,6 +23,65 @@ class _MyHomePageState extends State<MyHomePage> {
   Circle circle;
   GoogleMapController _controller;
   Set<Marker> _markers = {};
+  // List <LatLng> routeCoords;
+  int _polylineCount = 1;
+  Map<PolylineId, Polyline> _polylines = <PolylineId, Polyline>{};
+  GoogleMapPolyline _googleMapPolyline =
+      new GoogleMapPolyline(apiKey: "AIzaSyC1N_DmXtxP9DPr_qVJ-vqSgO8JqyjuCiw");
+
+  //Polyline patterns
+  List<List<PatternItem>> patterns = <List<PatternItem>>[
+    <PatternItem>[], //line
+    <PatternItem>[PatternItem.dash(30.0), PatternItem.gap(20.0)], //dash
+    <PatternItem>[PatternItem.dot, PatternItem.gap(10.0)], //dot
+    <PatternItem>[
+      //dash-dot
+      PatternItem.dash(30.0),
+      PatternItem.gap(20.0),
+      PatternItem.dot,
+      PatternItem.gap(20.0)
+    ],
+  ];
+
+  LatLng _mapInitLocation = LatLng(6.4204138, 80.0049826);
+
+  LatLng _originLocation = LatLng(6.4204138, 80.0049826);
+  LatLng _destinationLocation = LatLng(6.421276, 79.9999034);
+
+  _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      _controller = controller;
+    });
+  }
+
+  _getPolylinesWithLocation() async {
+    List<LatLng> _coordinates =
+        await _googleMapPolyline.getCoordinatesWithLocation(
+            origin: _originLocation,
+            destination: _destinationLocation,
+            mode: RouteMode.driving);
+
+    setState(() {
+      _polylines.clear();
+    });
+    _addPolyline(_coordinates);
+  }
+
+  _addPolyline(List<LatLng> _coordinates) {
+    PolylineId id = PolylineId("poly$_polylineCount");
+    Polyline polyline = Polyline(
+        polylineId: id,
+        patterns: patterns[0],
+        color: Colors.blueAccent,
+        points: _coordinates,
+        width: 10,
+        onTap: () {});
+
+    setState(() {
+      _polylines[id] = polyline;
+      _polylineCount++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +111,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition:
-            CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
+            CameraPosition(target: _mapInitLocation, zoom: 15.00),
+        // initialCameraPosition:
+            // CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
+        polylines: Set<Polyline>.of(_polylines.values),
         markers: _markers,
         // markers: Set.of([marker, parking1Marker, parking2Marker]),
         // markers: Set.of([parking1Marker, parking2Marker]),
@@ -96,8 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            {_showModalBottomSheet(), debugPrint("Tapped on flotbtn")},
+        onPressed: _getPolylinesWithLocation,
         child: Icon(Icons.map),
       ),
     );
@@ -144,6 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
     LatLng latlng = LatLng(newLocalData.latitude, newLocalData.longitude);
 
     this.setState(() {
+      
       Marker myLocation = Marker(
           markerId: MarkerId("home"),
           position: latlng,
