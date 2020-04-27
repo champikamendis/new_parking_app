@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:permission/permission.dart';
-import '../menu/menu.dart';
+import 'package:new_parking_app/screens/SideNav/menu.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -45,14 +44,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   LatLng _mapInitLocation = LatLng(6.4204138, 80.0049826);
 
-  LatLng _originLocation = LatLng(6.4204138, 80.0049826);
-  LatLng _destinationLocation = LatLng(6.421276, 79.9999034);
+  LatLng _originLocation;
+  
+  LatLng _destinationLocation;
+  
+  LatLng parking1 = LatLng(6.434959, 79.997053);
 
-  _onMapCreated(GoogleMapController controller) {
-    setState(() {
-      _controller = controller;
-    });
-  }
+  LatLng parking2 = LatLng(6.353738, 80.113079);
 
   _getPolylinesWithLocation() async {
     List<LatLng> _coordinates =
@@ -74,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
         patterns: patterns[0],
         color: Colors.blueAccent,
         points: _coordinates,
-        width: 10,
+        width: 5,
         onTap: () {});
 
     setState(() {
@@ -89,31 +87,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: new IconButton(
-            icon: new Icon(Icons.local_parking),
-            onPressed: () => debugPrint("Tapped logo")),
-        actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: choiceAction,
-            itemBuilder: (BuildContext context) {
-              return Menu.choices.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-          )
-        ],
         title: Text("Parking Mobile"),
         centerTitle: true,
+      ),
+      drawer: new Drawer(
+        child: ListView(children: <Widget>[
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.white)),
+              gradient: LinearGradient(
+                colors: <Color>[
+                  Colors.black87,
+                  Color.fromARGB(255, 3, 27, 47).withOpacity(0.8),
+                ],
+              ),
+            ),
+            accountName: new Text('Raja'),
+            accountEmail: new Text('testemail@test.com'),
+            currentAccountPicture: new CircleAvatar(
+              backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
+            ),
+          ),
+          CustomListTile(Icons.calendar_today, 'My Task', () => {}),
+          CustomListTile(Icons.payment, 'Payment', () => {}),
+          CustomListTile(Icons.settings, 'Settings', () => {}),
+          CustomListTile(Icons.info, 'About Us', () => {}),
+          CustomListTile(Icons.help, 'Help', () => {}),
+          CustomListTile(Icons.input, 'Logout', () => {})
+        ]),
       ),
       body: GoogleMap(
         mapType: MapType.hybrid,
         initialCameraPosition:
             CameraPosition(target: _mapInitLocation, zoom: 15.00),
         // initialCameraPosition:
-            // CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
+        // CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
         polylines: Set<Polyline>.of(_polylines.values),
         markers: _markers,
         // markers: Set.of([marker, parking1Marker, parking2Marker]),
@@ -134,10 +142,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // Markers for the parking places
             Marker parking1Marker = Marker(
-              markerId: MarkerId('Parking1'),
-              position: LatLng(6.4204138, 80.0049826),
+              markerId: MarkerId('Parking No.1'),
+              position: parking1,
               onTap: () {
-                _showModalBottomSheet();
+                _destinationLocation = parking1;
+               String btmSheetTitle = 'Parking No.1';
+                _showModalBottomSheet(btmSheetTitle);
               },
               infoWindow: InfoWindow(title: 'Public Park'),
               icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -145,10 +155,12 @@ class _MyHomePageState extends State<MyHomePage> {
             );
 
             Marker parking2Marker = Marker(
-              markerId: MarkerId('Parking2'),
-              position: LatLng(6.421276, 79.9999034),
+              markerId: MarkerId('Parking No.2'),
+              position: parking2,
               onTap: () {
-                _showModalBottomSheet();
+                _destinationLocation = parking2;
+                String btmSheetTitle = 'Parking No.2';
+                _showModalBottomSheet(btmSheetTitle);
               },
               infoWindow: InfoWindow(title: 'Beach Park'),
               icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -170,7 +182,6 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       Uint8List imageData = await getMarker();
       var location = await _locationTracker.getLocation();
-
       updateMarkerAndCircle(location, imageData);
 
       if (_locationSubscription != null) {
@@ -185,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   bearing: 192.833491395799,
                   target: LatLng(newLocalData.latitude, newLocalData.longitude),
                   tilt: 0,
-                  zoom: 19.5)));
+                  zoom: 14)));
           updateMarkerAndCircle(newLocalData, imageData);
         }
       });
@@ -199,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Uint8List> getMarker() async {
     ByteData byteData =
         await DefaultAssetBundle.of(context).load("assets/car_icon.png");
-
     return byteData.buffer.asUint8List();
   }
 
@@ -207,7 +217,9 @@ class _MyHomePageState extends State<MyHomePage> {
     LatLng latlng = LatLng(newLocalData.latitude, newLocalData.longitude);
 
     this.setState(() {
-      
+      _originLocation = latlng;
+
+
       Marker myLocation = Marker(
           markerId: MarkerId("home"),
           position: latlng,
@@ -241,20 +253,34 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  void _showModalBottomSheet() {
+   _showModalBottomSheet(String title) {
     showModalBottomSheet(
         context: context,
-        builder: (context) {
-          return Column(children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.email),
-              title: Text("Email"),
-              onTap: () {
-                print("tapped on me");
-              },
-            ),
-          ]);
-        });
+        builder: (context) => Container(
+            height: 150,
+            child: Column(children: <Widget>[
+              SizedBox(
+                height: 20,
+              ),
+              Text(title,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w700,
+                  )),
+              SizedBox(
+                height: 20,
+              ),
+              RaisedButton(
+                  child: Text(
+                    "Get Directions",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                  color: Colors.blue,
+                  onPressed: _getPolylinesWithLocation()),
+            ])));
   }
 }
 
@@ -270,13 +296,3 @@ class _MyHomePageState extends State<MyHomePage> {
 //     )
 //   ]));
 // }
-
-void choiceAction(String choice) {
-  if (choice == Menu.listView) {
-    print("Selected LIST");
-  } else if (choice == Menu.logout) {
-    print("Selected LOGOUT");
-  } else if (choice == Menu.quit) {
-    print("Selected QUIT");
-  }
-}
