@@ -109,12 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
               backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
             ),
           ),
-          CustomListTile(Icons.calendar_today, 'My Task', () => {}),
-          CustomListTile(Icons.payment, 'Payment', () => {}),
-          CustomListTile(Icons.settings, 'Settings', () => {}),
-          CustomListTile(Icons.info, 'About Us', () => {}),
-          CustomListTile(Icons.help, 'Help', () => {}),
-          CustomListTile(Icons.input, 'Logout', () => {})
+          CustomListTile(Icons.calendar_today, 'Parking List', () => {print("parking list should here")}),
+          CustomListTile(Icons.info, 'About Us', () => {print("About us page here")}),
+          CustomListTile(Icons.help, 'Help', () => {print("help page here")}),
+          CustomListTile(Icons.settings, 'Settings', () => {print("settings Page here")}),
+          CustomListTile(Icons.input, 'Logout', () => {print("Logout function")})
         ]),
       ),
       body: GoogleMap(
