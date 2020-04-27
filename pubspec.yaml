@@ -29,6 +29,7 @@ dependencies:
   cloud_firestore: ^0.12.9+4
   firebase_database: ^3.1.3
   google_map_polyline: ^0.2.0+1
+  permission: ^0.1.7
   
 
 dev_dependencies:
@@ -53,6 +54,8 @@ flutter:
     - assets/login.png
     - assets/bgimg.jpg
     - assets/registration.png
+    - assets/driving_pin.png
+    - assets/destination_map_marker.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
