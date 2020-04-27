@@ -52,7 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   LatLng parking2 = LatLng(6.353738, 80.113079);
 
-  _getPolylinesWithLocation() async {
+  _getPolylinesWithLocation(LatLng parkingLocation) async {
+    _destinationLocation = parkingLocation;
     List<LatLng> _coordinates =
         await _googleMapPolyline.getCoordinatesWithLocation(
             origin: _originLocation,
@@ -147,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 _destinationLocation = parking1;
                String btmSheetTitle = 'Parking No.1';
-                _showModalBottomSheet(btmSheetTitle);
+                _showModalBottomSheet(btmSheetTitle, parking1);
               },
               infoWindow: InfoWindow(title: 'Public Park'),
               icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -160,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 _destinationLocation = parking2;
                 String btmSheetTitle = 'Parking No.2';
-                _showModalBottomSheet(btmSheetTitle);
+                _showModalBottomSheet(btmSheetTitle, parking2);
               },
               infoWindow: InfoWindow(title: 'Beach Park'),
               icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -171,10 +172,10 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getPolylinesWithLocation,
-        child: Icon(Icons.map),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _getPolylinesWithLocation,
+      //   child: Icon(Icons.map),
+      // ),
     );
   }
 
@@ -253,7 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-   _showModalBottomSheet(String title) {
+   _showModalBottomSheet(String title, LatLng parkingLocation) {
     showModalBottomSheet(
         context: context,
         builder: (context) => Container(
@@ -279,7 +280,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   color: Colors.blue,
-                  onPressed: _getPolylinesWithLocation()),
+                  onPressed: (){
+                    _getPolylinesWithLocation(parkingLocation);
+                  }),
             ])));
   }
 }
