@@ -5,6 +5,7 @@ import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:new_parking_app/screens/SideNav/menu.dart';
+import 'package:new_parking_app/services/auth.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -16,6 +17,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final AuthService _auth = AuthService();
   StreamSubscription _locationSubscription;
   Location _locationTracker = Location();
   Marker marker;
@@ -45,12 +47,14 @@ class _MyHomePageState extends State<MyHomePage> {
   LatLng _mapInitLocation = LatLng(6.4204138, 80.0049826);
 
   LatLng _originLocation;
-  
+
   LatLng _destinationLocation;
-  
+
   LatLng parking1 = LatLng(6.434959, 79.997053);
 
   LatLng parking2 = LatLng(6.353738, 80.113079);
+  MapType setMap;
+  int counter = 0;
 
   _getPolylinesWithLocation(LatLng parkingLocation) async {
     _destinationLocation = parkingLocation;
@@ -87,95 +91,98 @@ class _MyHomePageState extends State<MyHomePage> {
     getCurrentLocation();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Parking Mobile"),
-        centerTitle: true,
-      ),
-      drawer: new Drawer(
-        child: ListView(children: <Widget>[
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.white)),
-              gradient: LinearGradient(
-                colors: <Color>[
-                  Colors.black87,
-                  Color.fromARGB(255, 3, 27, 47).withOpacity(0.8),
-                ],
+        appBar: AppBar(
+          title: Text("Parking Mobile"),
+          centerTitle: true,
+        ),
+        drawer: new Drawer(
+          child: ListView(children: <Widget>[
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.white)),
+                gradient: LinearGradient(
+                  colors: <Color>[
+                    Colors.black87,
+                    Color.fromARGB(255, 3, 27, 47).withOpacity(0.8),
+                  ],
+                ),
+              ),
+              accountName: new Text('Raja'),
+              accountEmail: new Text('testemail@test.com'),
+              currentAccountPicture: new CircleAvatar(
+                backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
               ),
             ),
-            accountName: new Text('Raja'),
-            accountEmail: new Text('testemail@test.com'),
-            currentAccountPicture: new CircleAvatar(
-              backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
-            ),
+            CustomListTile(Icons.calendar_today, 'Parking List',
+                () => {print("parking list should here")}),
+            CustomListTile(
+                Icons.info, 'About Us', () => {print("About us page here")}),
+            CustomListTile(Icons.help, 'Help', () => {print("help page here")}),
+            CustomListTile(Icons.settings, 'Settings',
+                () => {print("settings Page here")}),
+            CustomListTile(
+                Icons.input, 'Logout', () async {
+                  await _auth.logOut();
+
+                })
+          ]),
+        ),
+        body: GoogleMap(
+          mapType: setMap,
+          initialCameraPosition:
+              CameraPosition(target: _mapInitLocation, zoom: 15.00),
+          // initialCameraPosition:
+          // CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
+          polylines: Set<Polyline>.of(_polylines.values),
+          markers: _markers,
+          zoomControlsEnabled: false,
+          mapToolbarEnabled: false,
+          // markers: Set.of([marker, parking1Marker, parking2Marker]),
+          // markers: Set.of([parking1Marker, parking2Marker]),
+
+          circles: Set.of((circle != null) ? [circle] : []),
+          onMapCreated: (GoogleMapController controller) {
+            _controller = controller;
+            setState(() {
+              // Markers for the parking places
+              Marker parking1Marker = Marker(
+                markerId: MarkerId('Parking No.1'),
+                position: parking1,
+                onTap: () {
+                  _destinationLocation = parking1;
+                  String btmSheetTitle = 'Parking No.1';
+                  _showModalBottomSheet(btmSheetTitle, parking1);
+                },
+                infoWindow: InfoWindow(title: 'Public Park'),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueRed),
+              );
+
+              Marker parking2Marker = Marker(
+                markerId: MarkerId('Parking No.2'),
+                position: parking2,
+                onTap: () {
+                  _destinationLocation = parking2;
+                  String btmSheetTitle = 'Parking No.2';
+                  _showModalBottomSheet(btmSheetTitle, parking2);
+                },
+                infoWindow: InfoWindow(title: 'Beach Park'),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueBlue),
+              );
+              _markers.add(parking1Marker);
+              _markers.add(parking2Marker);
+            });
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              counter = counter + 1;
+              setMapType(counter);
+            },
+            child: Icon(Icons.map),
           ),
-          CustomListTile(Icons.calendar_today, 'Parking List', () => {print("parking list should here")}),
-          CustomListTile(Icons.info, 'About Us', () => {print("About us page here")}),
-          CustomListTile(Icons.help, 'Help', () => {print("help page here")}),
-          CustomListTile(Icons.settings, 'Settings', () => {print("settings Page here")}),
-          CustomListTile(Icons.input, 'Logout', () => {print("Logout function")})
-        ]),
-      ),
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition:
-            CameraPosition(target: _mapInitLocation, zoom: 15.00),
-        // initialCameraPosition:
-        // CameraPosition(target: LatLng(6.4204138, 80.0049826), zoom: 15.00),
-        polylines: Set<Polyline>.of(_polylines.values),
-        markers: _markers,
-        // markers: Set.of([marker, parking1Marker, parking2Marker]),
-        // markers: Set.of([parking1Marker, parking2Marker]),
-
-        circles: Set.of((circle != null) ? [circle] : []),
-        onMapCreated: (GoogleMapController controller) {
-          _controller = controller;
-          setState(() {
-            // _markers.add(Marker(
-            //     markerId: MarkerId('Marker1'),
-            //     position: LatLng(6.4204138, 80.0049826),
-            //     icon: BitmapDescriptor.defaultMarkerWithHue(
-            //         BitmapDescriptor.hueRed),
-            //     onTap: () {
-            //       _showModalBottomSheet();
-            //     }));
-
-            // Markers for the parking places
-            Marker parking1Marker = Marker(
-              markerId: MarkerId('Parking No.1'),
-              position: parking1,
-              onTap: () {
-                _destinationLocation = parking1;
-               String btmSheetTitle = 'Parking No.1';
-                _showModalBottomSheet(btmSheetTitle, parking1);
-              },
-              infoWindow: InfoWindow(title: 'Public Park'),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueRed),
-            );
-
-            Marker parking2Marker = Marker(
-              markerId: MarkerId('Parking No.2'),
-              position: parking2,
-              onTap: () {
-                _destinationLocation = parking2;
-                String btmSheetTitle = 'Parking No.2';
-                _showModalBottomSheet(btmSheetTitle, parking2);
-              },
-              infoWindow: InfoWindow(title: 'Beach Park'),
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueBlue),
-            );
-            _markers.add(parking1Marker);
-            _markers.add(parking2Marker);
-          });
-        },
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _getPolylinesWithLocation,
-      //   child: Icon(Icons.map),
-      // ),
-    );
+        );
   }
 
   void getCurrentLocation() async {
@@ -219,7 +226,6 @@ class _MyHomePageState extends State<MyHomePage> {
     this.setState(() {
       _originLocation = latlng;
 
-
       Marker myLocation = Marker(
           markerId: MarkerId("home"),
           position: latlng,
@@ -253,7 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-   _showModalBottomSheet(String title, LatLng parkingLocation) {
+  _showModalBottomSheet(String title, LatLng parkingLocation) {
     showModalBottomSheet(
         context: context,
         builder: (context) => Container(
@@ -279,22 +285,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   color: Colors.blue,
-                  onPressed: (){
+                  onPressed: () {
                     _getPolylinesWithLocation(parkingLocation);
                   }),
             ])));
   }
-}
 
-// Widget bottomSheet(BuildContext context) {
-//   return Container(
-//       child: Column(children: <Widget>[
-//     ListTile(
-//       leading: Icon(Icons.email),
-//       title: Text("Emails"),
-//       onTap: () {
-//         print("object");
-//       },
-//     )
-//   ]));
-// }
+  setMapType(int count) {
+    if (count % 2 == 1) {
+      setState(() {
+        setMap = null;
+        setMap = MapType.hybrid;
+        print(count);
+      });
+    } else {
+      setState(() {
+        setMap = null;
+        setMap = MapType.normal;
+      });
+    }
+  }
+}
