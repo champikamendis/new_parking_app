@@ -8,7 +8,7 @@ import 'package:new_parking_app/screens/SideNav/about_us.dart';
 import 'package:new_parking_app/screens/SideNav/help.dart';
 import 'package:new_parking_app/screens/SideNav/menu.dart';
 import 'package:bottom_sheet_stateful/bottom_sheet_stateful.dart';
-import 'package:new_parking_app/screens/SideNav/tasks.dart';
+import 'package:new_parking_app/screens/SideNav/parkingPlaces.dart';
 import 'package:new_parking_app/services/auth.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -121,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             CustomListTile(Icons.calendar_today, 'Parking List',
-                () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>TasksPage()))}),
+                () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>ParkingPlaces()))}),
             CustomListTile(
                 Icons.info, 'About Us', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>AboutPage()))}),
             CustomListTile(Icons.help, 'Help', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>Help()))}),

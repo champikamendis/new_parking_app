@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../Widgets/header.dart';
 
-class TasksPage extends StatefulWidget {
-  TasksPage({Key key}) : super(key: key);
+class ParkingPlaces extends StatefulWidget {
+  ParkingPlaces({Key key}) : super(key: key);
 
   @override
-  _TasksPageState createState() => _TasksPageState();
+  _ParkingPlacesState createState() => _ParkingPlacesState();
 }
 
-class _TasksPageState extends State<TasksPage> {
+class _ParkingPlacesState extends State<ParkingPlaces> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(titleText: "Tasks"),
+      appBar: header(context, titleText: "Parking Places"),
        body: DefaultTabController(
          length: 3,
          child: Column(
