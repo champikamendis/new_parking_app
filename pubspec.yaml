@@ -1,7 +1,6 @@
 name: new_parking_app
 description: A new Flutter application.
 
-
 version: 1.0.0+1
 
 environment:
@@ -13,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
 
- 
   cupertino_icons: ^0.1.2
   firebase_auth: ^0.14.0+5
   cloud_firestore: ^0.12.9+4
@@ -21,15 +19,13 @@ dependencies:
   google_map_polyline: ^0.2.0+1
   permission: ^0.1.7
   bottom_sheet_stateful: ^0.1.1
-  
+  provider: ^4.0.5+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter:
-
-
   uses-material-design: true
 
   assets:

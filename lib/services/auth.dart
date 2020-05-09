@@ -12,6 +12,7 @@ class AuthService {
     return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
   }
 
+  //Sign in with username and password
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
       AuthResult result = await _auth.signInWithEmailAndPassword(
@@ -25,6 +26,7 @@ class AuthService {
     }
   }
 
+//Register with details
   Future registerWithEmailAndPassword(String email, String password) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
@@ -37,4 +39,18 @@ class AuthService {
       return null;
     }
   }
+
+//Logout
+
+Future logOut() async {
+  try {
+    return await _auth.signOut();
+    
+  } catch (e) {
+    print(e.toString());
+    return null;
+  }
+}
+
+
 }

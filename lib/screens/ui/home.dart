@@ -9,6 +9,7 @@ import 'package:new_parking_app/screens/SideNav/help.dart';
 import 'package:new_parking_app/screens/SideNav/menu.dart';
 import 'package:bottom_sheet_stateful/bottom_sheet_stateful.dart';
 import 'package:new_parking_app/screens/SideNav/tasks.dart';
+import 'package:new_parking_app/services/auth.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -20,6 +21,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final AuthService _auth = AuthService();
   StreamSubscription _locationSubscription;
   Location _locationTracker = Location();
   Marker marker;
@@ -54,6 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
   LatLng parking1 = LatLng(6.434959, 79.997053);
 
   LatLng parking2 = LatLng(6.353738, 80.113079);
+  MapType setMap;
+  int counter = 0;
 
   MapType map_type = MapType.normal;
 
@@ -122,7 +126,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.info, 'About Us', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>AboutPage()))}),
             CustomListTile(Icons.help, 'Help', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>Help()))}),
             CustomListTile(
-                Icons.input, 'Logout', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>TasksPage()))}),
+                Icons.input, 'Logout', () async {
+                  await _auth.logOut();
+
+                })
           ]),
         ),
         body: GoogleMap(
