@@ -26,8 +26,8 @@ class _ParkingPlacesState extends State<ParkingPlaces> {
                 ),
                 tabs: [
                 Tab(text: "All"),
-                Tab(text: "Completed"),
-                Tab(text: "Cancelled")
+                Tab(text: "Available Places"),
+                Tab(text: "Full Places")
               ]),
             ),
             Expanded(

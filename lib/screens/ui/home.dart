@@ -5,9 +5,9 @@ import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:new_parking_app/screens/SideNav/about_us.dart';
-import 'package:new_parking_app/screens/SideNav/help.dart';
 import 'package:new_parking_app/screens/SideNav/menu.dart';
-import 'package:bottom_sheet_stateful/bottom_sheet_stateful.dart';
+import 'package:new_parking_app/screens/SideNav/notificationPage.dart';
+// import 'package:bottom_sheet_stateful/bottom_sheet_stateful.dart';
 import 'package:new_parking_app/screens/SideNav/parkingPlaces.dart';
 import 'package:new_parking_app/services/auth.dart';
 
@@ -120,16 +120,34 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
               ),
             ),
-            CustomListTile(Icons.calendar_today, 'Parking List',
-                () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>ParkingPlaces()))}),
             CustomListTile(
-                Icons.info, 'About Us', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>AboutPage()))}),
-            CustomListTile(Icons.help, 'Help', () => {Navigator.push(context, MaterialPageRoute(builder: (context) =>Help()))}),
+                Icons.calendar_today,
+                'Parking List',
+                () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ParkingPlaces()))
+                    }),
             CustomListTile(
-                Icons.input, 'Logout', () async {
-                  await _auth.logOut();
-
-                })
+                Icons.help,
+                'Help',
+                () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NotificationPage()))
+                    }),
+            CustomListTile(
+                Icons.info,
+                'About Us',
+                () => {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => AboutPage()))
+                    }),
+            CustomListTile(Icons.input, 'Logout', () async {
+              await _auth.logOut();
+            })
           ]),
         ),
         body: GoogleMap(
