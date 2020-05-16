@@ -1,4 +1,5 @@
 import 'dart:async';
+// import 'dart:html';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
@@ -7,9 +8,9 @@ import 'package:location/location.dart';
 import 'package:new_parking_app/screens/SideNav/about_us.dart';
 import 'package:new_parking_app/screens/SideNav/menu.dart';
 import 'package:new_parking_app/screens/SideNav/notificationPage.dart';
-// import 'package:bottom_sheet_stateful/bottom_sheet_stateful.dart';
 import 'package:new_parking_app/screens/SideNav/parkingPlaces.dart';
 import 'package:new_parking_app/services/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -53,9 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   LatLng _destinationLocation;
 
-  LatLng parking1 = LatLng(6.434959, 79.997053);
+  LatLng parking1;
 
-  LatLng parking2 = LatLng(6.353738, 80.113079);
+  LatLng parking2;
   MapType setMap;
   int counter = 0;
 
@@ -150,56 +151,61 @@ class _MyHomePageState extends State<MyHomePage> {
             })
           ]),
         ),
-        body: GoogleMap(
-          mapType: map_type,
-          mapToolbarEnabled: false,
-          zoomControlsEnabled: false,
-          initialCameraPosition:
-              CameraPosition(target: _mapInitLocation, zoom: 15.00),
-          polylines: Set<Polyline>.of(_polylines.values),
-          markers: _markers,
-          circles: Set.of((circle != null) ? [circle] : []),
-          onMapCreated: (GoogleMapController controller) {
-            _controller = controller;
-            setState(() {
-              // _markers.add(Marker(
-              //     markerId: MarkerId('Marker1'),
-              //     position: LatLng(6.4204138, 80.0049826),
-              //     icon: BitmapDescriptor.defaultMarkerWithHue(
-              //         BitmapDescriptor.hueRed),
-              //     onTap: () {
-              //       _showModalBottomSheet();
-              //     }));
+        body: StreamBuilder(
+            stream: Firestore.instance.collection('Parkings').snapshots(),
+            builder: (context, snapshot) {
+              return GoogleMap(
+                mapType: map_type,
+                mapToolbarEnabled: false,
+                zoomControlsEnabled: false,
+                initialCameraPosition:
+                    CameraPosition(target: _mapInitLocation, zoom: 15.00),
+                polylines: Set<Polyline>.of(_polylines.values),
+                markers: _markers,
+                circles: Set.of((circle != null) ? [circle] : []),
+                onMapCreated: (GoogleMapController controller) {
+                  _controller = controller;
+                  setState(() {
+                    double lat1 = snapshot.data.documents[0]['coords'].latitude;
+                    double lon1 =snapshot.data.documents[0]['coords'].longitude;
 
-              // Markers for the parking places
-              Marker parking1Marker = Marker(
-                markerId: MarkerId('Parking No.1'),
-                position: parking1,
-                onTap: () {
-                  _destinationLocation = parking1;
-                  String btmSheetTitle = 'Parking No.1';
-                  _showModalBottomSheet(btmSheetTitle, parking1);
-                },
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueRed),
-              );
+                    parking1 = LatLng(lat1, lon1);
 
-              Marker parking2Marker = Marker(
-                markerId: MarkerId('Parking No.2'),
-                position: parking2,
-                onTap: () {
-                  _destinationLocation = parking2;
-                  String btmSheetTitle = 'Parking No.2';
-                  _showModalBottomSheet(btmSheetTitle, parking2);
+                    double lat2 = snapshot.data.documents[1]['coords'].latitude;
+                    double lon2 = snapshot.data.documents[1]['coords'].longitude;
+
+                    parking2 = LatLng(lat2, lon2);
+
+                    // Markers for the parking places
+                    Marker parking1Marker = Marker(
+                      markerId: MarkerId('Parking No.1'),
+                      position: parking1,
+                      onTap: () {
+                        _destinationLocation = parking1;
+                        String btmSheetTitle = 'Parking No.1';
+                        _showModalBottomSheet(btmSheetTitle, parking1);
+                      },
+                      icon: BitmapDescriptor.defaultMarkerWithHue(
+                          BitmapDescriptor.hueRed),
+                    );
+
+                    Marker parking2Marker = Marker(
+                      markerId: MarkerId('Parking No.2'),
+                      position: parking2,
+                      onTap: () {
+                        _destinationLocation = parking2;
+                        String btmSheetTitle = 'Parking No.2';
+                        _showModalBottomSheet(btmSheetTitle, parking2);
+                      },
+                      icon: BitmapDescriptor.defaultMarkerWithHue(
+                          BitmapDescriptor.hueBlue),
+                    );
+                    _markers.add(parking1Marker);
+                    _markers.add(parking2Marker);
+                  });
                 },
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                    BitmapDescriptor.hueBlue),
               );
-              _markers.add(parking1Marker);
-              _markers.add(parking2Marker);
-            });
-          },
-        ),
+            }),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             _count = _count + 1;
