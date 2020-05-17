@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:new_parking_app/repository/databaseService.dart';
 import '../models/user.dart';
 
 class AuthService {
@@ -27,11 +29,16 @@ class AuthService {
   }
 
 //Register with details
+
+
+
   Future registerWithEmailAndPassword(String email, String password) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
+
+      DatabaseService(uid: user.uid);
 
       return (_userFromFirebaseUser(user));
     } catch (e) {

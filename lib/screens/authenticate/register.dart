@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:new_parking_app/repository/databaseService.dart';
 
 import 'package:new_parking_app/services/auth.dart';
 
@@ -20,6 +21,7 @@ class _RegisterState extends State<Register> {
   
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
+  final DatabaseService _databaseService = DatabaseService();
 
   String firstName = '';
   String lastName = '';
@@ -28,6 +30,7 @@ class _RegisterState extends State<Register> {
   String passwordConf = '';
   String error = '';
   File _selectedFile;
+  bool _inProcess = false;
 
   Widget getImageWidget(){
     if(_selectedFile != null) {
@@ -43,6 +46,9 @@ class _RegisterState extends State<Register> {
 
   
   getImage(ImageSource source) async {
+    setState(() {
+      _inProcess = true;
+    });
     File image = await ImagePicker.pickImage(source: source); 
     
     if(image !=null){
@@ -62,6 +68,7 @@ class _RegisterState extends State<Register> {
     
     );
     this.setState(() {
+      _inProcess = false;
       _selectedFile = cropped;
     });
     }
@@ -216,18 +223,20 @@ class _RegisterState extends State<Register> {
                                     dynamic result = await _auth
                                         .registerWithEmailAndPassword(
                                             email, password);
+
                                     if (result == null) {
                                       setState(() => error =
                                           'Please supply a valid email');
                                     } else {
-                                      database.reference().child("User Details").push().set(
-                                        {
-                                          "firstName" : firstName,
-                                          "lastName" : lastName,
-                                          "email" : email
+                                      // database.reference().child("User Details").push().set(
+                                      //   {
+                                      //     "firstName" : firstName,
+                                      //     "lastName" : lastName,
+                                      //     "email" : email
 
-                                        } 
-                                      );
+                                      //   } 
+                                      // );
+                                      _databaseService.userData(firstName, lastName, email);
                                       return Navigator.pop(context);
                                     }
                                   }
@@ -292,6 +301,9 @@ class _RegisterState extends State<Register> {
               ),
             ],
           ),
+          (_inProcess) ? Container(
+            child:Center(child: CircularProgressIndicator(),),
+          ):Center()
         ],
       ),
     );
