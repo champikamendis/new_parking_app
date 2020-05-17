@@ -20,6 +20,9 @@ dependencies:
   permission: ^0.1.7
   bottom_sheet_stateful: ^0.1.1
   provider: ^4.0.5+1
+  image_picker: ^0.6.6+1
+  image_cropper: ^1.2.0
+ 
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +39,4 @@ flutter:
     - assets/driving_pin.png
     - assets/destination_map_marker.png
     - assets/images/image-front.png
+    - assets/placeHolder.jpg

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:new_parking_app/services/auth.dart';
 
@@ -14,6 +17,7 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -23,6 +27,45 @@ class _RegisterState extends State<Register> {
   String password = '';
   String passwordConf = '';
   String error = '';
+  File _selectedFile;
+
+  Widget getImageWidget(){
+    if(_selectedFile != null) {
+      return Image.file(
+        _selectedFile,
+        width: 250,
+        height: 250,
+        fit: BoxFit.cover,
+
+      );
+    }
+  } 
+
+  
+  getImage(ImageSource source) async {
+    File image = await ImagePicker.pickImage(source: source); 
+    
+    if(image !=null){
+      File cropped = await ImageCropper.cropImage(
+      sourcePath: image.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressQuality: 100,
+      maxHeight: 700,
+      maxWidth: 700,
+      compressFormat: ImageCompressFormat.jpg,
+      androidUiSettings: AndroidUiSettings(
+        toolbarColor: Colors.blue,
+        toolbarTitle: "RPS Cropper",
+        statusBarColor: Colors.blue.shade900,
+        backgroundColor: Colors.white, 
+      )
+    
+    );
+    this.setState(() {
+      _selectedFile = cropped;
+    });
+    }
+  } 
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,6 +172,37 @@ class _RegisterState extends State<Register> {
                           obscureText: true,
                         ),
                         SizedBox(
+                          height: 20.0,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            new Text(
+                              "Set your Profile Picture : ",
+                              style: TextStyle(fontSize: 20),
+                              ),
+                            new Container(
+                              child: new RaisedButton(
+                                child: new Text("Upload"),
+                                onPressed: ()=> getImage(ImageSource.gallery),
+                              ),
+
+                            ),
+                             
+                          ],
+                        ),
+                        Center(
+
+                      child: Container(
+                        // height: 300,
+                        // width: 300,
+                        child:_selectedFile == null
+                          ? Text("No image")
+                          : Image.file(_selectedFile),
+
+                      )   
+                      
+                    ),
+                          SizedBox(
                           height: 20.0,
                         ),
                         new Row(

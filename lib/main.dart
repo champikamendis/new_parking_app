@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:new_parking_app/screens/authenticate/login.dart';
 import 'package:new_parking_app/screens/ui/home.dart';
 import 'package:new_parking_app/screens/ui/test2.dart';
+import './screens/authenticate/register.dart';
 import 'package:new_parking_app/services/auth.dart';
 import 'package:provider/provider.dart';
 import './wrapper.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue, 
         ),
-        home: MyHomePage(),
+        home: Register(),
       ),
     );
   }
