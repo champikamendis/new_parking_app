@@ -30,15 +30,13 @@ class AuthService {
 
 //Register with details
 
-
-
   Future registerWithEmailAndPassword(String email, String password) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
 
-      DatabaseService(uid: user.uid);
+      // DatabaseService(uid: user.uid);
 
       return (_userFromFirebaseUser(user));
     } catch (e) {
@@ -49,15 +47,12 @@ class AuthService {
 
 //Logout
 
-Future logOut() async {
-  try {
-    return await _auth.signOut();
-    
-  } catch (e) {
-    print(e.toString());
-    return null;
+  Future logOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
-}
-
-
 }

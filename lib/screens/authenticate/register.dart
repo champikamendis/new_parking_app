@@ -1,12 +1,17 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:new_parking_app/models/user.dart';
 import 'package:new_parking_app/repository/databaseService.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 
 import 'package:new_parking_app/services/auth.dart';
 
@@ -18,7 +23,8 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  
+  final User user = User();
+
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   final DatabaseService _databaseService = DatabaseService();
@@ -31,48 +37,58 @@ class _RegisterState extends State<Register> {
   String error = '';
   File _selectedFile;
   bool _inProcess = false;
+  var imageString;
 
-  Widget getImageWidget(){
-    if(_selectedFile != null) {
+  Widget getImageWidget() {
+    if (_selectedFile != null) {
       return Image.file(
         _selectedFile,
         width: 250,
         height: 250,
         fit: BoxFit.cover,
-
       );
     }
-  } 
+  }
 
-  
   getImage(ImageSource source) async {
     setState(() {
       _inProcess = true;
     });
-    File image = await ImagePicker.pickImage(source: source); 
-    
-    if(image !=null){
+    File image = await ImagePicker.pickImage(source: source);
+
+    if (image != null) {
       File cropped = await ImageCropper.cropImage(
-      sourcePath: image.path,
-      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
-      compressQuality: 100,
-      maxHeight: 700,
-      maxWidth: 700,
-      compressFormat: ImageCompressFormat.jpg,
-      androidUiSettings: AndroidUiSettings(
-        toolbarColor: Colors.blue,
-        toolbarTitle: "RPS Cropper",
-        statusBarColor: Colors.blue.shade900,
-        backgroundColor: Colors.white, 
-      )
-    
-    );
-    this.setState(() {
-      _inProcess = false;
-      _selectedFile = cropped;
-    });
+          sourcePath: image.path,
+          aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+          compressQuality: 100,
+          maxHeight: 700,
+          maxWidth: 700,
+          compressFormat: ImageCompressFormat.jpg,
+          androidUiSettings: AndroidUiSettings(
+            toolbarColor: Colors.blue,
+            toolbarTitle: "RPS Cropper",
+            statusBarColor: Colors.blue.shade900,
+            backgroundColor: Colors.white,
+          ));
+      this.setState(() {
+        _inProcess = false;
+        _selectedFile = cropped;
+      });
     }
-  } 
+  }
+
+  Future uploadImage() async {
+    String fileName = '$firstName$lastName';
+
+    StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('prof_pic/$fileName');
+
+    // imageString = await firebaseStorageRef.getDownloadURL();
+
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(_selectedFile);
+
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +140,7 @@ class _RegisterState extends State<Register> {
                     child: new Column(
                       children: <Widget>[
                         new TextFormField(
-                          autocorrect: false,
+                            autocorrect: false,
                             validator: (val) =>
                                 val.isEmpty ? 'Enter your FirstName' : null,
                             onChanged: (val) {
@@ -134,7 +150,7 @@ class _RegisterState extends State<Register> {
                               hintText: 'Enter your Firstname',
                             )),
                         new TextFormField(
-                          autocorrect: false,
+                            autocorrect: false,
                             validator: (val) =>
                                 val.isEmpty ? 'Enter your LastName' : null,
                             onChanged: (val) {
@@ -144,9 +160,8 @@ class _RegisterState extends State<Register> {
                               hintText: 'Enter your Lastname',
                             )),
                         new TextFormField(
-                          autocorrect: false,
-
-                          keyboardType: TextInputType.emailAddress,
+                            autocorrect: false,
+                            keyboardType: TextInputType.emailAddress,
                             validator: (val) =>
                                 val.isEmpty ? 'Enter your Email' : null,
                             onChanged: (val) {
@@ -186,30 +201,24 @@ class _RegisterState extends State<Register> {
                             new Text(
                               "Set your Profile Picture : ",
                               style: TextStyle(fontSize: 20),
-                              ),
+                            ),
                             new Container(
                               child: new RaisedButton(
                                 child: new Text("Upload"),
-                                onPressed: ()=> getImage(ImageSource.gallery),
+                                onPressed: () => getImage(ImageSource.gallery),
                               ),
-
                             ),
-                             
                           ],
                         ),
                         Center(
-
-                      child: Container(
-                        // height: 300,
-                        // width: 300,
-                        child:_selectedFile == null
-                          ? Text("No image")
-                          : Image.file(_selectedFile),
-
-                      )   
-                      
-                    ),
-                          SizedBox(
+                            child: Container(
+                          // height: 300,
+                          // width: 300,
+                          child: _selectedFile == null
+                              ? Text("No image")
+                              : Image.file(_selectedFile),
+                        )),
+                        SizedBox(
                           height: 20.0,
                         ),
                         new Row(
@@ -228,15 +237,12 @@ class _RegisterState extends State<Register> {
                                       setState(() => error =
                                           'Please supply a valid email');
                                     } else {
-                                      // database.reference().child("User Details").push().set(
-                                      //   {
-                                      //     "firstName" : firstName,
-                                      //     "lastName" : lastName,
-                                      //     "email" : email
+                                      String profPicUrl = ('not yet included');
+                                      _databaseService.userData(firstName,
+                                          lastName, email, profPicUrl);
 
-                                      //   } 
-                                      // );
-                                      _databaseService.userData(firstName, lastName, email);
+                                      uploadImage();
+
                                       return Navigator.pop(context);
                                     }
                                   }
@@ -289,7 +295,6 @@ class _RegisterState extends State<Register> {
                                   ),
                                   onTap: () => {
                                     Navigator.pop(context),
-                                    
                                   },
                                 )),
                           ],
@@ -301,9 +306,13 @@ class _RegisterState extends State<Register> {
               ),
             ],
           ),
-          (_inProcess) ? Container(
-            child:Center(child: CircularProgressIndicator(),),
-          ):Center()
+          (_inProcess)
+              ? Container(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : Center()
         ],
       ),
     );

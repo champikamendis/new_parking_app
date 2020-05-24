@@ -1,6 +1,8 @@
 import 'dart:async';
 // import 'dart:html';
 import 'dart:typed_data';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_map_polyline/google_map_polyline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -23,6 +25,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final AuthService _auth = AuthService();
+
   StreamSubscription _locationSubscription;
   Location _locationTracker = Location();
   Marker marker;
@@ -64,6 +67,49 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _count = 0;
 
+  String currentUserFirstName;
+
+  String currentUserLastName;
+
+  String currentUserEmail;
+
+  String currentUserImage;
+
+dynamic currentUserData;
+
+  Future<dynamic> getData() async {
+
+    String userID = (await FirebaseAuth.instance.currentUser()).uid;
+
+    final DocumentReference document =  Firestore.instance.collection("users").document(userID);
+
+    await document.get().then<dynamic>(( DocumentSnapshot snapshot) async{
+     setState(() {
+       currentUserData =snapshot.data;
+       currentUserFirstName = currentUserData['firstName'];
+       currentUserLastName = currentUserData['lastName'];
+       currentUserEmail = currentUserData['email'];
+       currentUserImage = currentUserData['profilePicture'];
+     
+     });
+    });
+ }
+
+ @override
+  void initState() {
+
+    super.initState();
+    getData();
+    print(currentUserData);
+    
+  }
+  getProfileImage(){
+    FirebaseAuth.instance.currentUser().then((user){
+      Firestore.instance.collection('prof_pic/').where('field');
+
+    });
+  }
+
   _getPolylinesWithLocation(LatLng parkingLocation) async {
     _destinationLocation = parkingLocation;
     List<LatLng> _coordinates =
@@ -94,6 +140,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     // getCurrentLocation();
@@ -115,10 +164,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
               ),
-              accountName: new Text('Raja'),
-              accountEmail: new Text('testemail@test.com'),
+              accountName: new Text(currentUserFirstName),
+              accountEmail: new Text(currentUserEmail),
               currentAccountPicture: new CircleAvatar(
-                backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
+                backgroundImage: new NetworkImage('https://picsum.photos/250?image=9'),
               ),
             ),
             CustomListTile(
@@ -131,8 +180,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               builder: (context) => ParkingPlaces()))
                     }),
             CustomListTile(
-                Icons.help,
-                'Help',
+                Icons.notifications,
+                'Notifications',
                 () => {
                       Navigator.push(
                           context,
@@ -167,12 +216,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   _controller = controller;
                   setState(() {
                     double lat1 = snapshot.data.documents[0]['coords'].latitude;
-                    double lon1 =snapshot.data.documents[0]['coords'].longitude;
+                    double lon1 =
+                        snapshot.data.documents[0]['coords'].longitude;
 
                     parking1 = LatLng(lat1, lon1);
 
                     double lat2 = snapshot.data.documents[1]['coords'].latitude;
-                    double lon2 = snapshot.data.documents[1]['coords'].longitude;
+                    double lon2 =
+                        snapshot.data.documents[1]['coords'].longitude;
 
                     parking2 = LatLng(lat2, lon2);
 
@@ -208,6 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
+            
             _count = _count + 1;
             setMapType(_count);
           },
