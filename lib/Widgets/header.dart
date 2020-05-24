@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 AppBar header(BuildContext context,
     {bool isAppTitle = false, String titleText}) {
   return AppBar(
+    
     backgroundColor: Colors.lightBlue,
     leading: IconButton(
       icon: Icon(
@@ -13,9 +14,14 @@ AppBar header(BuildContext context,
         Navigator.pop(context);
       },
     ),
-    title: Text(
+    title: 
+    Text(
       isAppTitle ? 'Enter your title' : titleText,
-      style: TextStyle(fontSize: 20.0, color: Colors.white),
+      style: TextStyle(
+        fontSize: 20.0,
+      
+        color: Colors.white,
+      ),
     ),
   );
 } // TODO Implement this library.

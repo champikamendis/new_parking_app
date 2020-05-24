@@ -1,5 +1,4 @@
 import 'dart:async';
-// import 'dart:html';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +12,7 @@ import 'package:new_parking_app/screens/SideNav/notificationPage.dart';
 import 'package:new_parking_app/screens/SideNav/parkingPlaces.dart';
 import 'package:new_parking_app/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'showParking.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -25,6 +25,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final AuthService _auth = AuthService();
+  // ShowParking showParking = ShowParking();
 
   StreamSubscription _locationSubscription;
   Location _locationTracker = Location();
@@ -75,38 +76,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String currentUserImage;
 
-dynamic currentUserData;
+  dynamic currentUserData;
+
+  List<int> _selectedSlots = [];
 
   Future<dynamic> getData() async {
-
     String userID = (await FirebaseAuth.instance.currentUser()).uid;
 
-    final DocumentReference document =  Firestore.instance.collection("users").document(userID);
+    final DocumentReference document =
+        Firestore.instance.collection("users").document(userID);
 
-    await document.get().then<dynamic>(( DocumentSnapshot snapshot) async{
-     setState(() {
-       currentUserData =snapshot.data;
-       currentUserFirstName = currentUserData['firstName'];
-       currentUserLastName = currentUserData['lastName'];
-       currentUserEmail = currentUserData['email'];
-       currentUserImage = currentUserData['profilePicture'];
-     
-     });
+    await document.get().then<dynamic>((DocumentSnapshot snapshot) async {
+      setState(() {
+        currentUserData = snapshot.data;
+        currentUserFirstName = currentUserData['firstName'];
+        currentUserLastName = currentUserData['lastName'];
+        currentUserEmail = currentUserData['email'];
+        currentUserImage = currentUserData['profilePicture'];
+      });
     });
- }
+  }
 
- @override
+  @override
   void initState() {
-
     super.initState();
     getData();
     print(currentUserData);
-    
   }
-  getProfileImage(){
-    FirebaseAuth.instance.currentUser().then((user){
-      Firestore.instance.collection('prof_pic/').where('field');
 
+  getProfileImage() {
+    FirebaseAuth.instance.currentUser().then((user) {
+      Firestore.instance.collection('prof_pic/').where('field');
     });
   }
 
@@ -140,12 +140,9 @@ dynamic currentUserData;
     });
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    // getCurrentLocation();
+    getCurrentLocation();
 
     return Scaffold(
         appBar: AppBar(
@@ -167,7 +164,8 @@ dynamic currentUserData;
               accountName: new Text(currentUserFirstName),
               accountEmail: new Text(currentUserEmail),
               currentAccountPicture: new CircleAvatar(
-                backgroundImage: new NetworkImage('https://picsum.photos/250?image=9'),
+                backgroundImage:
+                    new NetworkImage('https://picsum.photos/250?image=9'),
               ),
             ),
             CustomListTile(
@@ -259,7 +257,6 @@ dynamic currentUserData;
             }),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            
             _count = _count + 1;
             setMapType(_count);
           },
@@ -350,53 +347,67 @@ dynamic currentUserData;
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            var heightOfBottomSheet;
             return Container(
-                height: heightOfBottomSheet,
+              
                 child: Column(children: <Widget>[
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(title,
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                      )),
-                  SizedBox(
-                    height: 20,
-                  ),
+                   SizedBox(
+                height: 20,
+              ),
                   Container(
-                    child: GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 5,
-                      children: List.generate(20, (index) {
-                        return Container(
-                          margin: const EdgeInsets.all(5),
-                          color: Colors.blueGrey[100],
-                          child: Center(
-                            child: Text(
-                              'Slot ${index + 1}',
-                              style: Theme.of(context).textTheme.headline,
-                            ),
-                          ),
-                        );
-                      }),
+                    child: Text("$title",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight:FontWeight.w700
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  RaisedButton(
-                      child: Text(
-                        "Get Directions",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.white,
+                    
+                    ),),
+              SizedBox(
+                height: 20,
+              ),
+
+              Container(
+                child: GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 5,
+                  children: List.generate(20, (index) {
+                    return GestureDetector(
+                      onTap: () {
+                        _selectedSlots.clear();
+
+                        setState(() {
+                          _selectedSlots.add(index);
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(5),
+                        color: _selectedSlots.contains(index)
+                            ? Colors.blue
+                            : Colors.grey[300],
+                        child: Center(
+                          child: Text(
+                            'Slot ${index + 1}',
+                            style: Theme.of(context).textTheme.headline,
+                          ),
                         ),
                       ),
-                      color: Colors.blue,
-                      onPressed: () {
-                        // _getPolylinesWithLocation(parkingLocation);
-                      }),
-                ]));
+                    );
+                  }),
+                ),
+              ),
+              SizedBox(height: 20),
+              RaisedButton(
+                  child: Text(
+                    "Get Directions",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                    ),
+                  ),
+                  color: Colors.blue,
+                  onPressed: () {
+                    _getPolylinesWithLocation(parkingLocation);
+                  }),
+            ]));
           });
         });
   }
