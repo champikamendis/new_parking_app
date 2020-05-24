@@ -12,7 +12,6 @@ import 'package:new_parking_app/screens/SideNav/notificationPage.dart';
 import 'package:new_parking_app/screens/SideNav/parkingPlaces.dart';
 import 'package:new_parking_app/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'showParking.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);

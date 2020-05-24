@@ -7,8 +7,6 @@ import 'package:new_parking_app/services/auth.dart';
 import 'package:provider/provider.dart';
 import './wrapper.dart';
 import 'models/user.dart';
-import './screens/ui/showParking.dart';
-
 
 void main() => runApp(MyApp());
 
