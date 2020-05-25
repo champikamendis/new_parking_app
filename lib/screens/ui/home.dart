@@ -100,7 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     getData();
-    print(currentUserData);
+    getCurrentLocation();
+   
   }
 
   getProfileImage() {
@@ -141,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    getCurrentLocation();
+    
 
     return Scaffold(
         appBar: AppBar(
@@ -209,18 +210,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 polylines: Set<Polyline>.of(_polylines.values),
                 markers: _markers,
                 circles: Set.of((circle != null) ? [circle] : []),
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (GoogleMapController controller) async {
                   _controller = controller;
+                  double lat1 =
+                      await snapshot.data.documents[0]['coords'].latitude;
+                  double lon1 =
+                      await snapshot.data.documents[0]['coords'].longitude;
+                  double lat2 =
+                      await snapshot.data.documents[1]['coords'].latitude;
+                  double lon2 =
+                      await snapshot.data.documents[1]['coords'].longitude;
+
                   setState(() {
-                    double lat1 = snapshot.data.documents[0]['coords'].latitude;
-                    double lon1 =
-                        snapshot.data.documents[0]['coords'].longitude;
-
                     parking1 = LatLng(lat1, lon1);
-
-                    double lat2 = snapshot.data.documents[1]['coords'].latitude;
-                    double lon2 =
-                        snapshot.data.documents[1]['coords'].longitude;
 
                     parking2 = LatLng(lat2, lon2);
 
@@ -268,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getCurrentLocation() async {
     try {
-      Uint8List imageData = await getMarker();
+      Uint8List imageData = await getMarker(); 
       var location = await _locationTracker.getLocation();
       updateMarkerAndCircle(location, imageData);
 
@@ -347,23 +349,19 @@ class _MyHomePageState extends State<MyHomePage> {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             return Container(
-              
                 child: Column(children: <Widget>[
-                   SizedBox(
-                height: 20,
-              ),
-                  Container(
-                    child: Text("$title",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight:FontWeight.w700
-                    ),
-                    
-                    ),),
               SizedBox(
                 height: 20,
               ),
-
+              Container(
+                child: Text(
+                  "$title",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 child: GridView.count(
                   shrinkWrap: true,

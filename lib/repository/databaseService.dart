@@ -7,6 +7,7 @@ class DatabaseService{
   
 
   final CollectionReference userDetails = Firestore.instance.collection('users');
+  final CollectionReference notifyToken = Firestore.instance.collection('pushtokens');
  
 
   Future userData(String firstName, String lastName, String email, String profPicUrl) async {
@@ -17,6 +18,15 @@ class DatabaseService{
       'lastName': lastName,
       'email' : email,
       'profilePicture': profPicUrl,
+
+    });
+  }
+
+  Future userToken(String devtoken) async {
+    
+    return await notifyToken.document().setData({
+      'devtoken': devtoken
+    
 
     });
   }

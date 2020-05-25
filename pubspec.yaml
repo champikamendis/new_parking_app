@@ -23,6 +23,7 @@ dependencies:
   image_picker: ^0.6.6+1
   image_cropper: ^1.2.0
   firebase_storage: ^3.1.5
+  firebase_messaging: ^6.0.15
  
 
 dev_dependencies:

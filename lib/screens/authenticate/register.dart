@@ -12,7 +12,7 @@ import 'package:new_parking_app/repository/databaseService.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:new_parking_app/services/auth.dart';
 
 final FirebaseDatabase database = FirebaseDatabase.instance;
@@ -28,6 +28,22 @@ class _RegisterState extends State<Register> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   final DatabaseService _databaseService = DatabaseService();
+  final FirebaseMessaging _messaging = FirebaseMessaging();
+  String tokenID;
+
+  @override
+  void initState() { 
+    super.initState();
+    _messaging.getToken().then((token){
+      // tokenID = token;
+      _databaseService.userToken(token);
+
+      
+      
+    });
+    
+    
+  }
 
   String firstName = '';
   String lastName = '';
